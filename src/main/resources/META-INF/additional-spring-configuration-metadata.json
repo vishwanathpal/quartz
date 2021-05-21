@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "using.spring.schedulerFactory",
+    "type": "java.lang.String",
+    "description": "A description for 'using.spring.schedulerFactory'"
+  },
+  {
+    "name": "using.spring.schedulerFactory",
+    "type": "java.lang.String",
+    "description": "A description for 'using.spring.schedulerFactory'"
+  },
+  {
+    "name": "using.spring.schedulerFactory",
+    "type": "java.lang.String",
+    "description": "A description for 'using.spring.schedulerFactory'"
+  }
+]}
