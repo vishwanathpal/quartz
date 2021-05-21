@@ -3,6 +3,7 @@ package com.quartz.app.subscription.services;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.quartz.CronScheduleBuilder;
+import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.quartz.app.subscription.entity.OrderRecurrence;
+import com.quartz.app.subscription.job.OrderRecurrenceJobDetails;
 import com.quartz.app.subscription.util.SchedulerUtil;
 
 @Service
@@ -45,15 +47,58 @@ public class SchedulerService {
 									//.endAt(timerInfo.getRecurrentOrderingEndDate())
 									.build();
 		
-		try {
-			subscriptionScheduler.scheduleJob(jobDetails, trigger);
-			log.error(":::::::next order scheduled::::::"+trigger.getNextFireTime());
-			
-		} catch (SchedulerException e) {
-			log.error(e.getMessage(), e);
+		// null with new post request
+		Trigger oldTrigger = subscriptionScheduler.getTrigger(trigger.getKey());
+		//true = job exist and false = new job
+		//boolean  oldjobDetails = subscriptionScheduler.checkExists(trigger.getJobKey());
+		
+		if(oldTrigger == null) {
+			try {
+				subscriptionScheduler.scheduleJob(jobDetails, trigger);
+				log.error(":::::::next order scheduled::::::"+trigger.getNextFireTime());
+				
+			} catch (SchedulerException e) {
+				log.error(e.getMessage(), e);
+			}
 		}
+		// existing one
+		else {
+			TriggerBuilder tb = oldTrigger.getTriggerBuilder();
+			String cronExsNew = 0+" 0/"+timerInfo.getMinute()+" *"+" 1/1"+" *"+" ?"+" *"; 
+			Trigger newTrigger = tb.withSchedule(CronScheduleBuilder.cronSchedule(cronEx))
+				    .build();
+			
+			//newTrigger.getJobKey();
+			//subscriptionScheduler.getJobDetail(jobDetails.getKey());
+			
+			try {
+				subscriptionScheduler.rescheduleJob(oldTrigger.getKey(), newTrigger);
+				subscriptionScheduler.addJob(jobDetails, true);
+				//subscriptionScheduler.scheduleJob(jobDetails, newTrigger);
+				
+				// Add the new job to the scheduler, instructing it to "replace"
+				//  the existing job with the given name and group (if any)
+				/*
+				JobDetail job1 = (JobDetail) JobBuilder
+				        		 .newJob(OrderRecurrenceJobDetails.class)
+				        		 .withIdentity(newTrigger.getJobKey())
+				        		 .build();
+
+				// store, and set overwrite flag to 'true'     
+									subscriptionScheduler.addJob(job1, true);
+				*/
+				log.error(":::::::Updated order scheduled::::::"+newTrigger.getNextFireTime());
+				
+			} catch (SchedulerException e) {
+				log.error(e.getMessage(), e);
+			}
+		}
+		
+		
+		
 	}
 	
+	// adding job and trigger in DB
 	  public void addJobDeatilsAndTimerInfo(final String timerId, final OrderRecurrence info) {
 		  
 		  try {

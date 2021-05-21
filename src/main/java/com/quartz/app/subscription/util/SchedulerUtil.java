@@ -19,11 +19,16 @@ public class SchedulerUtil {
 		JobDataMap jobDataMap = new JobDataMap();
 		jobDataMap.put(String.valueOf(timerInfo.getOrderId()), timerInfo);
 		
+		//jobDataMap.getKeys();
+		
 		return JobBuilder
 				.newJob(jobClass)
 				.withIdentity(String.valueOf(timerInfo.getOrderId()))
+				.storeDurably(true)
 				.setJobData(jobDataMap)
 				.build();
+		
+		
 	}
 	
 	// not being used
