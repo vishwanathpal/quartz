@@ -1,6 +1,8 @@
 package com.quartz.app.subscription.services;
 
 import java.util.List;
+
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.quartz.app.subscription.entity.OrderRecurrence;
@@ -26,4 +28,31 @@ public class SchedulerTimerService {
 		
 		schedulerService.scheduleJob(OrderRecurrenceJobDetails.class, timerInfo);
 	}
+
+	public boolean deleteTimer(String timmerId) {
+		return schedulerService.deleteTrigger(timmerId);
+	}
+	
+	public String pauseTrigger(final String triggerId) throws SchedulerException {
+		return schedulerService.pauseTrigger(triggerId);
+		
+	}
+
+	public String resumeTrigger(final String triggerId) throws SchedulerException {
+		return schedulerService.pauseTrigger(triggerId);
+	}
+
+	public String unscheduledJob(String triggerId) throws SchedulerException {
+		return schedulerService.unschedulTrigger(triggerId);
+	}
+
+	public String scheduledJob(String triggerId) throws SchedulerException {
+		return schedulerService.schedulTrigger(triggerId);
+	}
+	
+	public void reScheduleSubscription(OrderRecurrence timerInfo) throws Exception {
+		schedulerService.reSchedulTrigger(OrderRecurrenceJobDetails.class, timerInfo);
+	}
+
+	
 }
